@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали книги - LitRes</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            background-color: #ffffff;
+            color: #333;
+        }
+        
+        .litres-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .litres-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        
+        .litres-actions {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            align-items: center;
+            margin-left: auto;
+        }
+        
+        .litres-actions a {
+            color: #1f3bb3;
+            text-decoration: none;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        
+        .litres-actions a:hover {
+            color: #2d4ace;
+        }
+        
+        .book-detail-container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .book-detail-header {
+            margin-bottom: 40px;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #1f3bb3;
+            text-decoration: none;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+        }
+        
+        .back-link:hover {
+            color: #2d4ace;
+        }
+        
+        .book-detail-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 50px;
+        }
+        
+        @media (max-width: 992px) {
+            .book-detail-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+        
+        .book-cover-section {
+            position: sticky;
+            top: 100px;
+        }
+        
+        .book-cover-large {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            margin-bottom: 25px;
+        }
+        
+        .book-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-buy {
+            background: linear-gradient(135deg, #1f3bb3, #667eea);
+            color: white;
+        }
+        
+        .btn-buy:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(31, 59, 179, 0.3);
+        }
+        
+        .btn-read {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+        
+        .btn-read:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+            transform: translateY(-3px);
+        }
+        
+        .btn-favorite {
+            background: white;
+            color: #666;
+            border: 2px solid #dee2e6;
+        }
+        
+        .btn-favorite:hover {
+            border-color: #ff4757;
+            color: #ff4757;
+            transform: translateY(-3px);
+        }
+        
+        .btn-favorite.active {
+            border-color: #ff4757;
+            color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+        .book-info-section h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .book-author {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .book-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .meta-label {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .meta-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+            color: #ffc107;
+        }
+        
+        .rating-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .rating-count {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .price-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+        }
+        
+        .book-price {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .book-price.free {
+            color: #00a650;
+        }
+        
+        .price-old {
+            font-size: 20px;
+            color: #999;
+            text-decoration: line-through;
+        }
+        
+        .book-description {
+            margin-bottom: 40px;
+        }
+        
+        .book-description h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .book-description p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        
+        .book-details {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .book-details h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .detail-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .similar-books {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid #e5e5e5;
+        }
+        
+        .similar-books h2 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .similar-books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+        }
+        
+        .similar-book-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .similar-book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #1f3bb3;
+        }
+        
+        .similar-book-cover {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .similar-book-info {
+            padding: 15px;
+        }
+        
+        .similar-book-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .similar-book-author {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .similar-book-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        @media (max-width: 768px) {
+            .book-detail-container {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+            
+            .book-info-section h1 {
+                font-size: 28px;
+            }
+            
+            .book-author {
+                font-size: 18px;
+            }
+            
+            .book-price {
+                font-size: 28px;
+            }
+            
+            .price-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .similar-books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            
+            .similar-book-cover {
+                height: 150px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .litres-container {
+                flex-wrap: wrap;
+            }
+            
+            .litres-actions {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+            
+            .book-cover-large {
+                max-width: 300px;
+                margin: 0 auto 20px;
+                display: block;
+            }
+            
+            .action-btn {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="litres-header">
+        <div class="litres-container">
+            <div class="litres-logo">
+                <img src="https://cdn.litres.ru/_next/static/media/newYearLogo.1d96ed91.svg" width="173" height="46" alt="Логотип Литрес">
+            </div>
+            
+            <div class="litres-actions">
+                <a href="index.html"><i class="bi bi-house"></i> Главная</a>
+                <a href="#"><i class="bi bi-gift"></i> Бонусы</a>
+                <a href="#"><i class="bi bi-cart"></i> Корзина</a>
+                <a href="#"><i class="bi bi-book"></i> Мои книги</a>
+                <a href="#"><i class="bi bi-person"></i> Войти</a>
+            </div>
+        </div>
+    </header>
+    
+    <main class="book-detail-container">
+        <div class="book-detail-header">
+            <a href="index.html" class="back-link">
+                <i class="bi bi-arrow-left"></i> Вернуться к каталогу
+            </a>
+        </div>
+        
+        <div class="book-detail-content">
+            <div class="book-cover-section">
+                <img id="book-cover" src="" alt="Обложка книги" class="book-cover-large">
+                
+                <div class="book-actions">
+                    <button id="buy-btn" class="action-btn btn-buy">
+                        <i class="bi bi-cart-plus"></i> Купить
+                    </button>
+                    <button id="read-btn" class="action-btn btn-read">
+                        <i class="bi bi-book"></i> Читать фрагмент
+                    </button>
+                    <button id="favorite-btn" class="action-btn btn-favorite">
+                        <i class="bi bi-heart"></i> В избранное
+                    </button>
+                </div>
+            </div>
+            
+            <div class="book-info-section">
+                <h1 id="book-title">Название книги</h1>
+                
+                <div class="book-author">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="book-author">Автор книги</span>
+                </div>
+                
+                <div class="book-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Жанр</span>
+                        <span class="meta-value" id="book-genre">Жанр</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Категория</span>
+                        <span class="meta-value" id="book-category">Категория</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Год</span>
+                        <span class="meta-value" id="book-year">2023</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Страниц</span>
+                        <span class="meta-value" id="book-pages">320</span>
+                    </div>
+                </div>
+                
+                <div class="rating">
+                    <div class="rating-stars" id="rating-stars">
+                    </div>
+                    <span class="rating-value" id="book-rating">4.5</span>
+                    <span class="rating-count">(152 оценки)</span>
+                </div>
+                
+                <div class="price-section">
+                    <div class="book-price" id="book-price">299 ₽</div>
+                    <div class="price-old" id="book-old-price">399 ₽</div>
+                    <span class="badge bg-danger">-25%</span>
+                </div>
+                
+                <div class="book-description">
+                    <h3>Описание</h3>
+                    <p id="book-description">Описание книги...</p>
+                </div>
+                
+                <div class="book-details">
+                    <h3>Детали книги</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">ISBN</span>
+                            <span class="detail-value" id="book-isbn">978-5-00117-876-5</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Издательство</span>
+                            <span class="detail-value" id="book-publisher">Издательский дом</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Язык</span>
+                            <span class="detail-value">Русский</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Формат</span>
+                            <span class="detail-value">EPUB, PDF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="similar-books">
+            <h2>Похожие книги</h2>
+            <div class="similar-books-grid" id="similar-books">
+
+            </div>
+        </div>
+    </main>
+    
+    <script src="db.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('id');
+
+        let currentBook = null;
+        
+        if (bookId) {
+
+            currentBook = Books.find(book => book.id === bookId);
+            
+
+            if (!currentBook) {
+                currentBook = BusinessBooks.find(book => book.id === bookId);
+            }
+        }
+
+        function displayBook(book) {
+            if (!book) {
+                document.body.innerHTML = `
+                    <div style="text-align: center; padding: 100px 20px;">
+                        <h1>Книга не найдена</h1>
+                        <p>Извините, книга с ID ${bookId} не найдена.</p>
+                        <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #1f3bb3; color: white; text-decoration: none; border-radius: 5px;">
+                            Вернуться на главную
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+            
+            document.title = `${book.name || book.title} - LitRes`;
+
+            document.getElementById('book-title').textContent = book.name || book.title;
+            document.getElementById('book-author').textContent = book.author;
+
+            const coverImg = document.getElementById('book-cover');
+            coverImg.src = book.rasm || book.cover;
+            coverImg.alt = book.name || book.title;
+            
+
+            document.getElementById('book-genre').textContent = book.genre || 'Не указан';
+            document.getElementById('book-category').textContent = book.category || 'Бизнес';
+            
+            if (book.year) {
+                document.getElementById('book-year').textContent = book.year;
+            }
+            if (book.pages) {
+                document.getElementById('book-pages').textContent = book.pages;
+            }
+            
+            // Рейтинг
+            const rating = book.rating || 4.5;
+            document.getElementById('book-rating').textContent = rating;
+            
+            const starsContainer = document.getElementById('rating-stars');
+            starsContainer.innerHTML = '';
+            
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < 5; i++) {
+                const star = document.createElement('i');
+                if (i < fullStars) {
+                    star.className = 'bi bi-star-fill';
+                } else if (i === fullStars && hasHalfStar) {
+                    star.className = 'bi bi-star-half';
+                } else {
+                    star.className = 'bi bi-star';
+                }
+                starsContainer.appendChild(star);
+            }
+            
+            // Цена
+            const priceElement = document.getElementById('book-price');
+            if (book.price === 0) {
+                priceElement.textContent = 'Бесплатно';
+                priceElement.classList.add('free');
+                document.getElementById('book-old-price').style.display = 'none';
+                document.querySelector('.badge').style.display = 'none';
+            } else {
+                priceElement.textContent = `${book.price} ₽`;
+                priceElement.classList.remove('free');
+                
+                const discount = Math.floor(Math.random() * 31) + 10; // 10-40%
+                const oldPrice = Math.round(book.price * (100 + discount) / 100);
+                document.getElementById('book-old-price').textContent = `${oldPrice} ₽`;
+                document.querySelector('.badge').textContent = `-${discount}%`;
+            }
+
+            document.getElementById('book-description').textContent = book.description || 'Описание отсутствует.';
+            document.getElementById('book-publisher').textContent = book.publisher || 'Не указано';
+            if (book.id) {
+                document.getElementById('book-isbn').textContent = `978-5-${String(book.id).padStart(3, '0')}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+            }
+            displaySimilarBooks(book);
+            setupEventHandlers(book);
+        }
+        
+        function displaySimilarBooks(book) {
+            const similarBooksContainer = document.getElementById('similar-books');
+            similarBooksContainer.innerHTML = '';
+            
+            let similarBooks = [];
+            
+            if (book.genre) {
+                similarBooks = Books.filter(b => 
+                    b.id !== book.id && 
+                    (b.genre === book.genre || b.category === book.category)
+                ).slice(0, 4);
+            }
+            
+            if (similarBooks.length < 4) {
+                const allBooks = [...Books, ...BusinessBooks];
+                const randomBooks = allBooks
+                    .filter(b => b.id !== book.id)
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 4 - similarBooks.length);
+                
+                similarBooks = [...similarBooks, ...randomBooks];
+            }
+            
+            similarBooks.forEach(similarBook => {
+                const bookCard = document.createElement('div');
+                bookCard.className = 'similar-book-card';
+                
+                const isBusinessBook = similarBook.hasOwnProperty('title');
+                const title = isBusinessBook ? similarBook.title : similarBook.name;
+                const author = similarBook.author;
+                const cover = isBusinessBook ? similarBook.cover : similarBook.rasm;
+                const price = similarBook.price === 0 ? 'Бесплатно' : `${similarBook.price} ₽`;
+                
+                bookCard.innerHTML = `
+                    <a href="book.html?id=${similarBook.id}" style="text-decoration: none; color: inherit;">
+                        <img src="${cover}" alt="${title}" class="similar-book-cover" onerror="this.src='https://via.placeholder.com/200x300/667eea/ffffff?text=${title.charAt(0)}'">
+                        <div class="similar-book-info">
+                            <h4 class="similar-book-title">${title}</h4>
+                            <p class="similar-book-author">${author}</p>
+                            <div class="similar-book-price">${price}</div>
+                        </div>
+                    </a>
+                `;
+                
+                similarBooksContainer.appendChild(bookCard);
+            });
+        }
+        
+        function setupEventHandlers(book) {
+            document.getElementById('buy-btn').addEventListener('click', function() {
+                if (book.price === 0) {
+                    alert('Книга добавлена в вашу библиотеку!');
+                } else {
+                    alert(`Книга "${book.name || book.title}" добавлена в корзину за ${book.price} ₽`);
+                }
+                
+
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 200);
+            });
+            
+
+            document.getElementById('read-btn').addEventListener('click', function() {
+                alert('Открывается фрагмент книги...');
+                
+
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 200);
+            });
+            
+
+            const favoriteBtn = document.getElementById('favorite-btn');
+            favoriteBtn.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const icon = this.querySelector('i');
+                icon.classList.toggle('bi-heart');
+                icon.classList.toggle('bi-heart-fill');
+                
+                if (this.classList.contains('active')) {
+                    alert(`Книга "${book.name || book.title}" добавлена в избранное`);
+                } else {
+                    alert(`Книга "${book.name || book.title}" удалена из избранного`);
+                }
+            
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 200);
+            });
+            
+            const savedFavorites = JSON.parse(localStorage.getItem('favoriteBooks') || '[]');
+            if (savedFavorites.includes(book.id)) {
+                favoriteBtn.classList.add('active');
+                favoriteBtn.querySelector('i').classList.remove('bi-heart');
+                favoriteBtn.querySelector('i').classList.add('bi-heart-fill');
+            }
+            
+            favoriteBtn.addEventListener('click', function() {
+                let favorites = JSON.parse(localStorage.getItem('favoriteBooks') || '[]');
+                
+                if (this.classList.contains('active')) {
+                    if (!favorites.includes(book.id)) {
+                        favorites.push(book.id);
+                    }
+                } else {
+                    favorites = favorites.filter(id => id !== book.id);
+                }
+                
+                localStorage.setItem('favoriteBooks', JSON.stringify(favorites));
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            displayBook(currentBook);
+            
+            const loginBtns = document.querySelectorAll('.litres-actions a:has(.bi-person)');
+            loginBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('Для входа перейдите на главную страницу');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

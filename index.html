@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LitRes - Онлайн библиотека</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        /* Шапка */
+        .litres-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .litres-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .catalog-btn {
+            padding: 8px 16px;
+            border: 1px solid #1f3bb3;
+            background: #1f3bb3;
+            color: #ffffff;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .catalog-btn:hover {
+            background: #2d4ace;
+        }
+
+        .search {
+            flex: 1;
+            display: flex;
+            max-width: 720px;
+        }
+
+        .search-input {
+            flex: 1;
+            height: 40px;
+            padding: 0 14px;
+            font-size: 14px;
+            border: 1px solid #1f3bb3;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            outline: none;
+            color: #333;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .search-btn {
+            height: 40px;
+            padding: 0 22px;
+            background: #1f3bb3;
+            color: #ffffff;
+            border: 1px solid #1f3bb3;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #162c8a;
+        }
+
+        .litres-actions {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            align-items: center;
+        }
+
+        .litres-actions a {
+            color: #1f3bb3;
+            text-decoration: none;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .litres-actions a:hover {
+            color: #2d4ace;
+        }
+
+        /* Каталог */
+        .catalog-menu {
+            position: fixed;
+            top: 0;
+            left: -400px;
+            width: 380px;
+            height: 100vh;
+            background: white;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+            z-index: 2000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .catalog-menu.show {
+            left: 0;
+        }
+
+        .catalog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+            display: none;
+        }
+
+        .catalog-overlay.show {
+            display: block;
+        }
+
+        .catalog-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .catalog-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e5e5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #1f3bb3, #667eea);
+            color: white;
+        }
+
+        .catalog-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .catalog-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .catalog-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .catalog-body {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .catalog-section {
+            margin-bottom: 35px;
+        }
+
+        .catalog-section h4 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #1f3bb3;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .catalog-section h4 i {
+            color: #1f3bb3;
+        }
+
+        .catalog-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .catalog-item {
+            padding: 14px 16px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            border: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .catalog-item:hover {
+            background: #1f3bb3;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(31, 59, 179, 0.25);
+            border-color: #1f3bb3;
+        }
+
+        .catalog-item i {
+            font-size: 16px;
+        }
+
+        .catalog-item:hover i {
+            color: white;
+        }
+
+        /* Основной контент */
+        .container {
+            max-width: 1400px;
+            padding: 0 20px;
+            margin: 40px auto;
+        }
+
+        .section-header {
+            margin: 0 0 30px 0;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 8px 0;
+        }
+
+        .section-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Быстрые фильтры */
+        .filters-section {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 25px;
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: #1f3bb3;
+            color: white;
+            border-color: #1f3bb3;
+            box-shadow: 0 4px 15px rgba(31, 59, 179, 0.2);
+        }
+
+        .reset-filters-btn {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 25px;
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .reset-filters-btn:hover {
+            background: #e9ecef;
+            color: #333;
+            border-color: #adb5bd;
+            transform: translateY(-2px);
+        }
+
+        /* Карточки книг */
+        .book-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            height: 100%;
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border-color: #1f3bb3;
+        }
+
+        .book-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .book-cover-container {
+            position: relative;
+            overflow: hidden;
+            height: 320px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+        }
+
+        .book-cover {
+            width: auto;
+            max-width: 100%;
+            height: auto;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+            border-radius: 6px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-card:hover .book-cover {
+            transform: scale(1.08);
+        }
+
+        .book-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #ff6a00, #ff8c00);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 25px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 2;
+            box-shadow: 0 3px 10px rgba(255, 106, 0, 0.3);
+        }
+
+        .book-genre-badge {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(31, 59, 179, 0.9);
+            color: white;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 15px;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+        }
+
+        .book-favorite {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            z-index: 2;
+            color: #666;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-favorite:hover {
+            background: white;
+            color: #ff4757;
+            transform: scale(1.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-favorite.active {
+            color: #ff4757;
+        }
+
+        .book-info {
+            padding: 22px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .book-title {
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: #333;
+            margin: 0 0 12px 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 48px;
+        }
+
+        .book-author {
+            font-size: 15px;
+            color: #666;
+            margin: 0 0 15px 0;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 18px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .book-rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .book-rating i {
+            color: #ffc107;
+        }
+
+        .book-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .book-price.free {
+            color: #00a650;
+        }
+
+        /* Секция бизнес-книг */
+        .business-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 80px 0;
+            margin-top: 80px;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .business-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .business-title {
+            font-size: 38px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .business-title:after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #1f3bb3, #667eea);
+            border-radius: 2px;
+        }
+
+        .business-subtitle {
+            font-size: 18px;
+            color: #666;
+            max-width: 800px;
+            margin: 30px auto 0;
+            line-height: 1.6;
+        }
+
+        /* Карточки бизнес-книг */
+        .business-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .business-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border-color: #1f3bb3;
+        }
+
+        .book-number {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #1f3bb3, #667eea);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            z-index: 1;
+            box-shadow: 0 3px 10px rgba(31, 59, 179, 0.3);
+        }
+
+        .business-book-cover-container {
+            position: relative;
+            height: 260px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            overflow: hidden;
+        }
+
+        .business-book-cover {
+            width: auto;
+            max-width: 100%;
+            height: auto;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.4s ease;
+            border-radius: 6px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .business-card:hover .business-book-cover {
+            transform: scale(1.08);
+        }
+
+        .business-book-info {
+            padding: 22px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .business-book-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 10px 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 45px;
+        }
+
+        .business-book-author {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 8px 0;
+            font-weight: 500;
+        }
+
+        .business-book-publisher {
+            font-size: 13px;
+            color: #888;
+            margin: 0;
+            font-style: italic;
+        }
+
+        .business-book-genre {
+            font-size: 12px;
+            color: #1f3bb3;
+            background: rgba(31, 59, 179, 0.1);
+            padding: 5px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1400px) {
+            .book-cover-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .book-cover-container {
+                height: 280px;
+            }
+            
+            .business-book-cover-container {
+                height: 240px;
+            }
+            
+            .business-title {
+                font-size: 34px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .litres-container {
+                flex-wrap: wrap;
+                gap: 12px;
+                padding: 12px 16px;
+            }
+            
+            .search {
+                order: 3;
+                width: 100%;
+                max-width: 100%;
+                margin-top: 8px;
+            }
+            
+            .litres-actions {
+                gap: 16px;
+                font-size: 13px;
+            }
+            
+            .catalog-menu {
+                width: 340px;
+                left: -340px;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .book-cover-container {
+                height: 260px;
+            }
+            
+            .business-book-cover-container {
+                height: 220px;
+            }
+            
+            .business-title {
+                font-size: 30px;
+            }
+            
+            .business-subtitle {
+                font-size: 16px;
+                padding: 0 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+                margin: 30px auto;
+            }
+            
+            .catalog-menu {
+                width: 300px;
+                left: -300px;
+            }
+            
+            .catalog-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 26px;
+            }
+            
+            .section-subtitle {
+                font-size: 14px;
+            }
+            
+            .book-cover-container {
+                height: 240px;
+            }
+            
+            .book-title {
+                font-size: 16px;
+            }
+            
+            .book-price {
+                font-size: 18px;
+            }
+            
+            .business-section {
+                padding: 60px 0;
+                margin-top: 60px;
+            }
+            
+            .business-book-cover-container {
+                height: 200px;
+            }
+            
+            .business-title {
+                font-size: 28px;
+            }
+            
+            .filters-section {
+                gap: 10px;
+                margin: 20px 0;
+            }
+            
+            .filter-btn, .reset-filters-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                margin: 20px auto;
+                padding: 0 12px;
+            }
+            
+            .litres-actions {
+                justify-content: space-between;
+                width: 100%;
+            }
+            
+            .catalog-menu {
+                width: 280px;
+                left: -280px;
+            }
+            
+            .book-cover-container {
+                height: 220px;
+            }
+            
+            .business-book-cover-container {
+                height: 180px;
+            }
+            
+            .business-title {
+                font-size: 26px;
+            }
+            
+            .business-subtitle {
+                font-size: 15px;
+                padding: 0 10px;
+            }
+            
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .reset-filters-btn {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+        /* Стили для модального окна входа */
+#loginModal .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+#loginModal .modal-header {
+    border-bottom: 1px solid #e5e5e5;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1f3bb3, #667eea);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+#loginModal .modal-title {
+    font-weight: 600;
+    font-size: 20px;
+}
+
+#loginModal .modal-body {
+    padding: 24px;
+}
+
+#loginModal .btn-close {
+    filter: invert(1) brightness(100);
+    opacity: 0.8;
+}
+
+#loginModal .btn-close:hover {
+    opacity: 1;
+}
+
+#loginModal h4 {
+    font-weight: 600;
+    color: #333;
+    font-size: 18px;
+}
+
+#loginModal .form-control {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 12px 16px;
+    font-size: 15px;
+}
+
+#loginModal .form-control:focus {
+    border-color: #1f3bb3;
+    box-shadow: 0 0 0 0.25rem rgba(31, 59, 179, 0.25);
+}
+
+#loginModal .btn-primary {
+    padding: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+#loginModal .btn-primary:hover {
+    background-color: #2d4ace;
+    border-color: #2d4ace;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(31, 59, 179, 0.3);
+}
+
+.recommendations-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.recommendations-section h6 {
+    color: #333;
+    font-weight: 600;
+    border-bottom: 2px solid #1f3bb3;
+    padding-bottom: 8px;
+    display: inline-block;
+}
+
+.recommendation-card {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #e5e5e5;
+    transition: all 0.3s;
+}
+
+.recommendation-card:hover {
+    border-color: #1f3bb3;
+    box-shadow: 0 4px 12px rgba(31, 59, 179, 0.1);
+}
+
+.rec-cover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.book-card-mini {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #e5e5e5;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.book-card-mini:hover {
+    border-color: #1f3bb3;
+    box-shadow: 0 4px 12px rgba(31, 59, 179, 0.1);
+    transform: translateY(-2px);
+}
+
+.book-cover-mini {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    margin: 0 auto;
+}
+
+/* Адаптивность модального окна */
+@media (max-width: 768px) {
+    #loginModal .modal-dialog {
+        margin: 10px;
+    }
+    
+    #loginModal .books-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #loginModal .modal-body {
+        padding: 20px 16px;
+    }
+}
+    </style>
+</head>
+
+<body>
+    <!-- Модальное окно входа -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Войти</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <h4 class="mb-3">Последний рейс – без обратного билета</h4>
+                    <p class="text-muted mb-0">Трамвай №302 выходит из чтобы увезти вычеркнутых вместе с мёртвыми пассаж.</p>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="loginEmail" class="form-label">Почта или логин</label>
+                    <input type="text" class="form-control" id="loginEmail" placeholder="Введите почту или логин">
+                </div>
+                
+                <button type="button" class="btn btn-primary w-100 mb-3" style="background-color: #1f3bb3; border-color: #1f3bb3;">
+                    Войти
+                </button>
+                
+                <div class="text-center mb-4">
+                    <p class="text-muted mb-2">Номер телефона</p>
+                    <p class="text-muted mb-0">Другие способы</p>
+                </div>
+                
+                <div class="recommendations-section">
+                    <h6 class="mb-3">Рекомендуем вам</h6>
+                    
+                    <div class="recommendation-card mb-3">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="rec-cover bg-light rounded" style="width: 50px; height: 70px;"></div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1 fw-semibold">Тёмный маг. Книга 13. Странный путь</p>
+                                <p class="mb-1 small text-muted">Звездная Кровь-9. Ранг неизвестен</p>
+                                <p class="mb-0 small">Роман Прокофьев</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-card mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-warning me-2">Хит продаж</span>
+                            <p class="mb-0 fw-semibold">Звездная Кровь-9. Ранг неизвестен</p>
+                        </div>
+                        <p class="mb-0 small">Романд Прокофьев</p>
+                    </div>
+                    
+                    <div class="recommendation-card">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-info me-2">Хит проигрыш</span>
+                            <p class="mb-0 fw-semibold">Звездная Кровь-9. Ранг неизвестен</p>
+                        </div>
+                        <p class="mb-0 small">Романд Прокофьев</p>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="books-grid mb-4">
+                    <div class="book-card-mini">
+                        <div class="book-cover-mini bg-light rounded mb-2" style="width: 100%; height: 100px;"></div>
+                        <p class="mb-1 small fw-semibold">Телохранитель Генесса. Том 4</p>
+                        <p class="mb-0 small text-muted">Петр Алмазный</p>
+                    </div>
+                    
+                    <div class="book-card-mini">
+                        <div class="book-cover-mini bg-light rounded mb-2" style="width: 100%; height: 100px;"></div>
+                        <p class="mb-1 small fw-semibold">Кровь Василиска. Том 8</p>
+                        <p class="mb-0 small text-muted">Юрий Винокуров и др.</p>
+                    </div>
+                    
+                    <div class="book-card-mini">
+                        <div class="book-cover-mini bg-light rounded mb-2" style="width: 100%; height: 100px;"></div>
+                        <p class="mb-1 small fw-semibold">Голод тела</p>
+                        <p class="mb-0 small text-muted">Голод тела — психосоматика...</p>
+                        <p class="mb-0 small text-muted">Екатерина Туп</p>
+                    </div>
+                    
+                    <div class="book-card-mini">
+                        <div class="book-cover-mini bg-light rounded mb-2" style="width: 100%; height: 100px;"></div>
+                        <p class="mb-1 small fw-semibold">Атом прикосноматика</p>
+                        <p class="mb-0 small text-muted">Атом прикосноматика ...</p>
+                        <p class="mb-0 small text-muted">Екатерина Туп</p>
+                    </div>
+                </div>
+                
+                <div class="text-center small text-muted">
+                    При входе на ресурс вы принимаете публичную оферту и обработку персональных данных.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <header class="litres-header">
+        <div class="litres-container">
+            <div class="litres-logo">
+                <img src="https://cdn.litres.ru/_next/static/media/newYearLogo.1d96ed91.svg" width="173" height="46" alt="Логотип Литрес">
+            </div>
+
+            <button class="catalog-btn" id="catalog-toggle-btn">
+                <i class="bi bi-grid-3x3-gap"></i> Каталог
+            </button>
+
+            <form class="search" id="search-form">
+                <input
+                    type="text"
+                    class="search-input"
+                    id="search-input"
+                    placeholder="Искать книги, авторов, жанры..."
+                />
+                <button type="submit" class="search-btn">
+                    <i class="bi bi-search"></i> Найти
+                </button>
+            </form>
+
+            <div class="litres-actions">
+                <a href="#"><i class="bi bi-gift"></i> Бонусы</a>
+                <a href="#"><i class="bi bi-cart"></i> Корзина</a>
+                <a href="#"><i class="bi bi-book"></i> Мои книги</a>
+                <a href="#"><i class="bi bi-person"></i> Войти</a>
+            </div>
+        </div>
+    </header>
+
+
+    <main class="container">
+
+        <div class="section-header">
+            <div>
+                <h1 class="section-title" id="section-title">Новинки</h1>
+                <p class="section-subtitle" id="section-subtitle">Самые свежие книги и бестселлеры этого месяца</p>
+            </div>
+            
+
+            <div class="filters-section">
+                <span style="font-weight: 500; color: #666; margin-right: 10px;">Фильтры:</span>
+                <button class="filter-btn" data-filter="all">
+                    <i class="bi bi-grid"></i> Все книги
+                </button>
+                <button class="filter-btn" data-filter="new">
+                    <i class="bi bi-star"></i> Новинки
+                </button>
+                <button class="filter-btn" data-filter="popular">
+                    <i class="bi bi-fire"></i> Популярное
+                </button>
+                <button class="filter-btn" data-filter="bestseller">
+                    <i class="bi bi-trophy"></i> Бестселлеры
+                </button>
+                <button class="reset-filters-btn" id="reset-filters-btn">
+                    <i class="bi bi-arrow-counterclockwise"></i> Сбросить
+                </button>
+            </div>
+        </div>
+        
+        <div class="row g-4" id="Book-list">
+            <a href="book.html?id=${book.id}" class="book-card-link"></a>
+        </div>
+    </main>
+
+
+    <div class="business-section">
+        <div class="container">
+            <div class="business-header">
+                <h2 class="business-title" id="business-title">Лучшие бизнес-книги</h2>
+                <p class="business-subtitle"> Деловая и научно-популярная литература издательств «Манн, Иванов и Фербер», «Альпина Паблишер», «Олимп-Бизнес» и других</p>
+            </div>
+            
+            <div class="row g-4" id="Business-books-list">
+                <a href="business-book.html?id=${book.id}" style="text-decoration: none; color: inherit;"></a>
+            </div>
+        </div>
+    </div>
+
+    <script src="db.js"></script>
+    <script src="catalog.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.book-favorite')) {
+                    const btn = e.target.closest('.book-favorite');
+                    btn.classList.toggle('active');
+                    const icon = btn.querySelector('i');
+                    icon.classList.toggle('bi-heart');
+                    icon.classList.toggle('bi-heart-fill');
+                    
+                    // Анимация сердечка
+                    btn.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        btn.style.transform = 'scale(1)';
+                    }, 200);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
